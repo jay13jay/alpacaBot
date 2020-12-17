@@ -2,22 +2,45 @@ import string
 import configparser
 import requests
 import json
+import os.path
+from os import path
 from bs4 import BeautifulSoup
 
 
-# eodata stores the tickers based on the first letter
-# for example: AAPL - Apple will be stored on  http://eoddata.com/stocklist/NYSE/A.htm
+def loadTickers(confFile):
+    """
+    Load ticker file if present, otherwise call func to retrieve
+    Pass True to create file data/tickers.json with a list of tickers and a dict containing "tickers":"company name"
+    Pass False to only return a list of tickers
+    """
+    # Set the variables from the config file
+    conf = configparser.ConfigParser()
+    conf.read(confFile)
+    dataDir = conf['GLOBAL']['dataDir']
+    tickFile = dataDir + conf['GLOBAL']['tickFile']
+    createTickFile = conf['GLOBAL']['createTickFile']
+    baseURL = conf['EODATA']['base_url']
 
+    if path.exists(tickFile):
+        print("found tickers.json, loading file")
+        with open(tickFile) as f:
+            tickers = json.load(f)
+            tickers = tickers['tickers']
+    else:
+        if createTickFile:
+            print("tickers.json not found, populating")
+            tickers = populateTickers(True, baseURL, tickFile)
+        else:
+            print("createTickFile false, only returning tickers")
+            tickers = populateTickers(False, baseURL, tickFile)
+    return(tickers)
 
 # Create list of all letteres to iterate over eodata pages
-def populateTickers(confDir, wbool):
-    conf = configparser.ConfigParser()
-    conf.read(confDir+"conf.ini")
-    baseURL = conf['EODATA']['base_url']
+def populateTickers(wbool, baseURL, tickFile): 
     alpha = list(string.ascii_uppercase)
     symbols = []
     data = {}
-    data['tickers'] = []    
+    data['tickers'] = []
 
     for page in alpha:
         url = baseURL + page + '.htm'
@@ -35,7 +58,7 @@ def populateTickers(confDir, wbool):
             data[tick] = tickName
     # check wbool, if true, write file, either way, return tickers
     if wbool:    
-        with open(confDir + 'tickers.json', 'w') as f:
+        with open(tickFile, 'w') as f:
             json.dump(data, f)
 
     return(data['tickers'])
