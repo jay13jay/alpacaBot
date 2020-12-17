@@ -5,19 +5,15 @@ import json
 from bs4 import BeautifulSoup
 
 
-# Setup constants
-conf = configparser.ConfigParser()
-conf.read('../data/conf.ini')
-baseURL = conf['EODATA']['base_url']
-
-
 # eodata stores the tickers based on the first letter
 # for example: AAPL - Apple will be stored on  http://eoddata.com/stocklist/NYSE/A.htm
 
 
-
 # Create list of all letteres to iterate over eodata pages
-def getTickers():
+def populateTickers(confDir, wbool):
+    conf = configparser.ConfigParser()
+    conf.read(confDir+"conf.ini")
+    baseURL = conf['EODATA']['base_url']
     alpha = list(string.ascii_uppercase)
     symbols = []
     data = {}
@@ -37,12 +33,9 @@ def getTickers():
             symbols.append(tick)
             data['tickers'].append(tick)
             data[tick] = tickName
-        
-    print(data['tickers'])
-    with open('../data/tickers.json', 'w') as f:
-        json.dump(data, f)
-        
+    # check wbool, if true, write file, either way, return tickers
+    if wbool:    
+        with open(confDir + 'tickers.json', 'w') as f:
+            json.dump(data, f)
 
-
-if __name__ == "__main__":
-    getTickers()
+    return(data['tickers'])
