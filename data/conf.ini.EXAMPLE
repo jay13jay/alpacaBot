@@ -1,0 +1,4 @@
+[ALPACA]
+key_id	    =	PK9BAHK9W13K8J3EQ8AE ; 20 character api key id, which should be viewable on your dashboard
+secret_key	=	API_SECRET_KEY ; 40 char API secret key long and will only display once on the dashboard
+endpoint    = https://paper-api.alpaca.markets  ; endpoint URL, be sure to check this carefully based on whether you intend to trade with real or paper money
