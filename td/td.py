@@ -1,7 +1,9 @@
 import time
 import pytz
 import configparser
+import pandas as pd
 from datetime import datetime, timedelta
+from appLog import appLog
 import requests
 
 conf = configparser.ConfigParser()
@@ -46,16 +48,17 @@ def chunks(tlist, n):
   return (tlist[i:i+n] for i in range(0, len(tlist), n))
 
 
-def quotes_request(ticker, api_key, params):
+def quotes_request(ticker):
   """
   Makes an api call for a list of stock symbols
   and returns a dataframe
   """
-  url = r"https://api.tdameritrade.com/v1/marketdata/quotes"
+  api_key = conf['TD']['key']
+  url     = conf['TD']['quotesURL']
 
   params = {
   'apikey': api_key,
-  'symbol': stocks
+  'symbol': ticker
   }
 
   request = requests.get(

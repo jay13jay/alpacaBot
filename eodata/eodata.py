@@ -3,13 +3,19 @@ import configparser
 import requests
 import json
 import os.path
+from appLog import appLog
 from os import path
 from bs4 import BeautifulSoup
+
+# Configuration file
+conf = configparser.ConfigParser()
+conf.read("data/conf.ini")
+dataDir = conf['GLOBAL']['dataDir']
 
 
 def loadTickers(confFile):
     """
-    Load ticker file if present, otherwise call func to retrieve
+    Load ticker file if present, otherwise call func populateTickers() to retrieve
     Pass True to create file data/tickers.json with a list of tickers and a dict containing "tickers":"company name"
     Pass False to only return a list of tickers
     """
@@ -22,16 +28,16 @@ def loadTickers(confFile):
     baseURL = conf['EODATA']['base_url']
 
     if path.exists(tickFile):
-        print("found tickers.json, loading file")
+        appLog.info("found tickers.json, loading file")
         with open(tickFile) as f:
             tickers = json.load(f)
             tickers = tickers['tickers']
     else:
         if createTickFile:
-            print("tickers.json not found, populating")
+            appLog.info("tickers.json not found, populating")
             tickers = populateTickers(True, baseURL, tickFile)
         else:
-            print("createTickFile false, only returning tickers")
+            appLog.info("createTickFile false, only returning tickers")
             tickers = populateTickers(False, baseURL, tickFile)
     return(tickers)
 
@@ -60,5 +66,6 @@ def populateTickers(wbool, baseURL, tickFile):
     if wbool:    
         with open(tickFile, 'w') as f:
             json.dump(data, f)
+            appLog.info("\'{}\' written with {} tickers".format(tickFile,len(data['tickers'])))
 
     return(data['tickers'])
